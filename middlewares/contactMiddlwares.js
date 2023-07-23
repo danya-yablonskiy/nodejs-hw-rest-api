@@ -12,7 +12,7 @@ const checkContactId = async (req, res, next) => {
   //   if (!isValidId) throw AppError(404, "Contact does not exists");
   //   next();
     if (!isValidObjectId(req.params.contactId)) {
-      next(AppError(400, "Contact does not exists"));
+      next(AppError(400, "Invalid id"));
     }
     next();
 };
