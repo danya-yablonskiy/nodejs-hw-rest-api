@@ -10,18 +10,20 @@ const {
   updateContactById,
   updateStatusContact,
 } = require("../../controllers/controllers");
+
 const checkContactId = require("../../middlewares/contactMiddlwares");
+const authecticate = require('../../middlewares/authenticate')
 
-router.get("/", getAllContacts);
+router.get("/", authecticate, getAllContacts);
 
-router.get("/:contactId", checkContactId, getOneContactById);
+router.get("/:contactId", authecticate, checkContactId, getOneContactById);
 
-router.post("/", createContact);
+router.post("/", authecticate, createContact);
 
-router.delete("/:contactId", checkContactId, deleteContactByID);
+router.delete("/:contactId", authecticate, checkContactId, deleteContactByID);
 
-router.put("/:contactId", checkContactId, updateContactById);
+router.put("/:contactId", authecticate, checkContactId, updateContactById);
 
-router.patch("/:contactId/favorite", checkContactId, updateStatusContact);
+router.patch("/:contactId/favorite", authecticate, checkContactId, updateStatusContact);
 
 module.exports = router;
