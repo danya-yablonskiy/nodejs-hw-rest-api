@@ -21,7 +21,13 @@ const updateFavoriteSchema = (data) =>
     .validate(data);
 
 const getAllContacts = async (req, res) => {
-  const contacts = await Contact.find();
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10 } = req.query;
+  const skip = (page - 1) * limit;
+  const contacts = await Contact.find({ owner }, "", { skip, limit }).populate(
+    "owner",
+    "email"
+  );
 
   res.json({ contacts });
 };
@@ -37,7 +43,6 @@ const getOneContactById = async (req, res, next) => {
     }
 
     res.json({ oneContact });
-
   } catch (error) {
     next(error);
   }
@@ -50,10 +55,10 @@ const createContact = async (req, res, next) => {
     if (error) {
       throw AppError(400, "Missing required name field");
     }
+    const { _id: owner } = req.user;
 
-    const newContact = await Contact.create(req.body);
+    const newContact = await Contact.create({ ...req.body, owner });
     res.status(201).json(newContact);
-
   } catch (error) {
     next(error);
   }
@@ -69,7 +74,6 @@ const deleteContactByID = async (req, res, next) => {
     }
 
     res.json({ message: "Contact deleted", oneContact });
-    
   } catch (error) {
     next(error);
   }
@@ -109,7 +113,6 @@ const updateStatusContact = async (req, res, next) => {
     }
 
     res.json(update);
-
   } catch (error) {
     next(error);
   }
