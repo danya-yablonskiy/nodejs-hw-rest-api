@@ -3,11 +3,11 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
-// =====================================ЧОМУ ТУТ АНДЕФАЙНД?==============================
-// const { SECRET_KEY } = process.env
-// console.log(SECRET_KEY);
 
-const SECRET_KEY = "8xMGGka1IDZTSufdvvQys1khqzvSIWeK";
+const { SECRET_KEY } = process.env;
+
+
+
 const registerSchema = (data) =>
   Joi.object()
     .options({ abortEarly: false })
@@ -104,5 +104,5 @@ module.exports = {
   login,
   getCurrent,
   logout,
-  SECRET_KEY,
+ 
 };
