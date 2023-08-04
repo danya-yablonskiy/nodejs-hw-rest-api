@@ -22,9 +22,11 @@ const updateFavoriteSchema = (data) =>
 
 const getAllContacts = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, favorite = false } = req.query;
   const skip = (page - 1) * limit;
-  const contacts = await Contact.find({ owner }, "", { skip, limit }).populate(
+  const filter = favorite ? { owner, favorite } : { owner };
+
+  const contacts = await Contact.find(filter, "", { skip, limit }).populate(
     "owner",
     "email"
   );
