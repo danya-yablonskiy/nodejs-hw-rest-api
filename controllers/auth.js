@@ -3,10 +3,9 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
+const subscriptionList = require("../constants/subscriptionList");
 
 const { SECRET_KEY } = process.env;
-
-
 
 const registerSchema = (data) =>
   Joi.object()
@@ -26,6 +25,13 @@ const loginSchema = (data) =>
       password: Joi.string().min(6).required(),
     })
     .validate(data);
+
+const updateSubscriptionSchema = (data) =>
+  Joi.object().keys({
+    subscription: Joi.string()
+      .valid(...Object.values(subscriptionList))
+      .required(),
+  });
 
 const register = async (req, res, next) => {
   try {
@@ -87,8 +93,8 @@ const login = async (req, res, next) => {
 };
 
 const getCurrent = async (req, res, next) => {
-  const { email } = req.user;
-  res.json({ email });
+  const { email, subscription } = req.user;
+  res.json({ email, subscription });
 };
 
 const logout = async (req, res, next) => {
@@ -99,10 +105,33 @@ const logout = async (req, res, next) => {
     message: "Logout success",
   });
 };
+
+const updateSubscription = async (req, res, next) => {
+  const { error } = updateSubscriptionSchema(req.body);
+
+  if (error) {
+    throw AppError(400, error.message);
+  }
+
+  const { _id } = req.user;
+  const user = await User.findByIdAndUpdate(_id, req.body, { new: true });
+
+  if (!user) {
+    throw AppError(404, "Not found");
+  }
+
+  res.json({
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
+  });
+};
+
 module.exports = {
   register,
   login,
   getCurrent,
   logout,
- 
+  updateSubscription,
 };
