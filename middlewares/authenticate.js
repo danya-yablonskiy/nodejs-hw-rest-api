@@ -9,7 +9,7 @@ const authecticate = async (req, res, next) => {
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
 
-  if (bearer !== "Bearer") {
+  if (bearer !== "Bearer" || !token) {
     next(AppError(401, "Unauthorized"));
   }
 
@@ -17,7 +17,7 @@ const authecticate = async (req, res, next) => {
     const { id } = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(id);
 
-    if (!user || !user.token || user.token !== token) {
+    if (!user.token) {
       next(AppError(401, "Unauthorized"));
     }
     req.user = user;
