@@ -27,11 +27,13 @@ const loginSchema = (data) =>
     .validate(data);
 
 const updateSubscriptionSchema = (data) =>
-  Joi.object().keys({
-    subscription: Joi.string()
-      .valid(...Object.values(subscriptionList))
-      .required(),
-  });
+  Joi.object()
+    .keys({
+      subscription: Joi.string()
+        .valid(...Object.values(subscriptionList))
+        .required(),
+    })
+    .validate(data);
 
 const register = async (req, res, next) => {
   try {
@@ -110,7 +112,7 @@ const updateSubscription = async (req, res, next) => {
   const { error } = updateSubscriptionSchema(req.body);
 
   if (error) {
-    throw AppError(400, error.message);
+    throw AppError(400, "Not found");
   }
 
   const { _id } = req.user;
