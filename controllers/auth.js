@@ -109,50 +109,32 @@ const logout = async (req, res, next) => {
 };
 
 const updateSubscription = async (req, res, next) => {
-  const { error } = updateSubscriptionSchema(req.body);
+  try {
+    const { error } = updateSubscriptionSchema(req.body);
 
-  if (error) {
-    throw AppError(400, "Not found");
+    if (error) {
+      throw AppError(400, "Enter the correct data");
+    }
+
+    const { _id } = req.user;
+
+    const user = await User.findByIdAndUpdate(_id, req.body, { new: true });
+
+    if (!user) {
+      throw AppError(404, "Not found2");
+    }
+
+    res.json({
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const { _id } = req.user;
-
-  const user = await User.findByIdAndUpdate(_id, req.body, { new: true });
-
-  if (!user) {
-    throw AppError(404, "Not found");
-  }
-
-  res.json({
-    user: {
-      email: user.email,
-      subscription: user.subscription,
-    },
-  });
 };
-// const updateSubscription = async (req, res, next) => {
-//   const { error } = updateSubscriptionSchema(req.body);
-//   console.log(error);
 
-//   const { _id } = req.user;
-
-//   const user = await User.findById(_id);
-
-//   const { subscription } = req.body;
-//   user.subscription = subscription;
-//   const updatedUser = await user.save();
-
-//   if (!user) {
-//     throw AppError(404, "Not found");
-//   }
-
-//   res.json({
-//     user: {
-//       email: user.email,
-//       subscription: updatedUser.subscription,
-//     },
-//   });
-// };
 module.exports = {
   register,
   login,
