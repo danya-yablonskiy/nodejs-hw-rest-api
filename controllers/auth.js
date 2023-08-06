@@ -1,11 +1,15 @@
 const bcrypt = require("bcrypt");
+const path = require("path");
+const fs = require("fs/promises");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const gravatar = require("gravatar");
 const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
 const subscriptionList = require("../constants/subscriptionList");
 
 const { SECRET_KEY } = process.env;
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 const registerSchema = (data) =>
   Joi.object()
@@ -50,8 +54,12 @@ const register = async (req, res, next) => {
       throw AppError(400, "Enter the correct data");
     }
     const hashPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({ ...req.body, password: hashPassword });
+    const avatarURL = gravatar.url(email);
+    const newUser = await User.create({
+      ...req.body,
+      password: hashPassword,
+      avatarURL,
+    });
 
     res.status(201).json({
       newUser,
@@ -101,6 +109,7 @@ const getCurrent = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   const { _id } = req.user;
+
   await User.findByIdAndUpdate(_id, { token: "" });
 
   res.json({
@@ -135,10 +144,28 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (res, req, next) => {
+  const { _id } = req.user;
+
+  const { path: tempUpload, originalName } = req.file;
+  // console.log(tempUpload);
+  // console.log(originalName);
+  const resultUpload = path.join(avatarsDir, originalName);
+  // console.log(resultUpload);
+  await fs.rename(tempUpload, resultUpload);
+  const avatarURL = path.join("avatars", originalName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    avatarURL,
+  });
+};
+
 module.exports = {
   register,
   login,
   getCurrent,
   logout,
   updateSubscription,
+  updateAvatar,
 };
