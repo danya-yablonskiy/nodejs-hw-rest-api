@@ -145,15 +145,14 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
-const updateAvatar = async (res, req, next) => {
+const updateAvatar = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const { path: tempUpload, originalName } = req.file;
-    const filename = `${_id}_${originalName}`;
-    // console.log(tempUpload);
-    // console.log(originalName);
+
+    const { path: tempUpload, originalname } = req.file;
+    const filename = `${_id}_${originalname}`;
+
     const resultUpload = path.join(avatarsDir, filename);
-    // console.log(resultUpload);
 
     await fs.rename(tempUpload, resultUpload);
 
