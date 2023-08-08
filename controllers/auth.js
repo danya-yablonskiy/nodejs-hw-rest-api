@@ -2,12 +2,13 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs/promises");
 const jwt = require("jsonwebtoken");
-const jimp = require("jimp");
+
 const Joi = require("joi");
 const gravatar = require("gravatar");
 const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
 const subscriptionList = require("../constants/subscriptionList");
+const resizeImage = require("../utils/resizeImage");
 
 const { SECRET_KEY } = process.env;
 const avatarsDir = path.join(__dirname, "../", "public", "avatars");
@@ -155,11 +156,9 @@ const updateAvatar = async (req, res, next) => {
     const resultUpload = path.join(avatarsDir, filename);
 
     await fs.rename(tempUpload, resultUpload);
-
-    const avatar = await jimp.read(req.file.buffer);
-    await avatar.cover(250, 250).writeAsync(resultUpload);
-
+    resizeImage(resultUpload);
     const avatarURL = path.join("avatars", filename);
+    console.log(avatarURL);
     await User.findByIdAndUpdate(_id, { avatarURL });
 
     res.json({
